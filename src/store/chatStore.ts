@@ -19,6 +19,7 @@ interface ChatState {
   activeConversationId: string | null;
   messages: Message[];
   isAiTyping: boolean;
+  isCollapsed: boolean;
   
   setConversations: (conversations: Conversation[]) => void;
   setActiveConversationId: (id: string | null) => void;
@@ -26,6 +27,7 @@ interface ChatState {
   addMessage: (message: Message) => void;
   appendChunkToLastMessage: (chunk: string) => void;
   setIsAiTyping: (isTyping: boolean) => void;
+  setIsCollapsed: (isCollapsed: boolean) => void;
 }
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -33,6 +35,7 @@ export const useChatStore = create<ChatState>((set) => ({
   activeConversationId: null,
   messages: [],
   isAiTyping: false,
+  isCollapsed: false,
 
   setConversations: (conversations) => set({ conversations }),
   
@@ -88,6 +91,7 @@ export const useChatStore = create<ChatState>((set) => ({
   }),
 
   setIsAiTyping: (isAiTyping) => set({ isAiTyping }),
+  setIsCollapsed: (isCollapsed) => set({ isCollapsed }),
 }));
 
 export default useChatStore;

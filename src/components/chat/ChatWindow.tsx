@@ -1,16 +1,48 @@
 import React from 'react';
+import axios from 'axios';
 import MessageList from './MessageList.tsx';
 import ChatInput from './ChatInput.tsx';
 import useSocket from '../../hooks/useSocket.ts';
 import useChatStore from '../../store/chatStore.ts';
-import { Bot, Sparkles } from 'lucide-react';
+import { Bot, Sparkles, RotateCw, X } from 'lucide-react';
 
 export const ChatWindow: React.FC = () => {
-  const activeConversationId = useChatStore((state) => state.activeConversationId);
+  const {
+    activeConversationId,
+    conversations,
+    setConversations,
+    setActiveConversationId,
+    setMessages,
+    setIsCollapsed,
+  } = useChatStore();
+
   const { sendMessage } = useSocket(activeConversationId);
 
   const handleSend = (content: string) => {
     sendMessage(content);
+  };
+
+  const handleNewChat = async () => {
+    try {
+      const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5005';
+      const startRes = await axios.post(`${apiBaseUrl}/api/conversations/start`, {
+        initialMessage: 'Hi, I would like to ask some questions about Spur Store.',
+      });
+      if (startRes.data && startRes.data.conversation) {
+        const newConv = startRes.data.conversation;
+        setConversations([newConv, ...conversations]);
+        setActiveConversationId(newConv._id);
+        setMessages([
+          {
+            conversationId: newConv._id,
+            sender: 'user',
+            text: 'Hi, I would like to ask some questions about Spur Store.',
+          }
+        ]);
+      }
+    } catch (err) {
+      console.error('Failed to start new chat session:', err);
+    }
   };
 
   if (!activeConversationId) {
@@ -48,9 +80,30 @@ export const ChatWindow: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 bg-violet-500/10 border border-violet-500/20 text-violet-400 px-3 py-1.5 rounded-full text-xs font-semibold">
-          <Sparkles size={12} className="animate-pulse text-cyan-400" />
-          <span>Spur AI Support</span>
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={handleNewChat}
+            className="flex items-center gap-1.5 bg-white/5 border border-white/10 hover:border-violet-500/50 hover:bg-violet-500/10 text-xs text-slate-300 hover:text-white px-3 py-1.5 rounded-full transition-all duration-200 shadow-sm active:scale-95"
+            title="Start a new chat session"
+          >
+            <RotateCw size={12} />
+            <span>New Chat</span>
+          </button>
+
+          <div className="flex items-center gap-1.5 bg-violet-500/10 border border-violet-500/20 text-violet-400 px-3.5 py-1.5 rounded-full text-xs font-semibold">
+            <Sparkles size={12} className="animate-pulse text-cyan-400" />
+            <span>Spur AI Support</span>
+          </div>
+
+          <button
+            onClick={() => setIsCollapsed(true)}
+            className="flex items-center justify-center bg-white/5 border border-white/10 hover:border-rose-500/50 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 w-8 h-8 rounded-full transition-all duration-200 shadow-sm active:scale-95"
+            style={{ padding: 0 }}
+            title="Collapse chat"
+            id="close-chat-btn"
+          >
+            <X size={16} />
+          </button>
         </div>
       </div>
 
