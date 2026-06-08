@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import useChatStore, { Message } from '../store/chatStore.ts';
 
-const SOCKET_URL = 'http://localhost:5005';
+const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005';
 
 export const useSocket = (conversationId: string | null) => {
   const socketRef = useRef<Socket | null>(null);
